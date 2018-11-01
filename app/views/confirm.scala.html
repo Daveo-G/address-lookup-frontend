@@ -11,7 +11,7 @@
       <a class="back-link" href="javascript:history.back()">Back</a>
     </div>
   }
-  <h1 class="form-title heading-xlarge" id="pageHeading">@{journeyData.resolvedConfig.confirmPage.heading}</h1>
+  <h1 class="form-title heading-large" id="pageHeading">@{journeyData.resolvedConfig.confirmPage.heading}</h1>
   @if(selectedAddress.isDefined) {
     @helpers.form(controllers.routes.AddressLookupController.handleConfirm(id)) {
       <fieldset class="form-field-group">

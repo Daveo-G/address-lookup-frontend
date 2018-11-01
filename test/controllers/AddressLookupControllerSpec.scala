@@ -143,10 +143,10 @@ class AddressLookupControllerSpec
 
   "lookup" should {
 
-    "return a form which permits input of building name/number and postcode" in new Scenario(
+    "return a form which permits input of building name/number and postcode and should pre pop values" in new Scenario(
       journeyData = Map("foo" -> basicJourney())
     ) {
-      val res = call(controller.lookup("foo"), req)
+      val res = call(controller.lookup("foo",Some("ZZ1 1ZZ"),Some("The House")), req)
       val html = contentAsString(res).asBodyFragment
       html should include element withName("title").withValue("Find the address")
       html should include element withName("h1").withValue("Find the address")
@@ -155,7 +155,36 @@ class AddressLookupControllerSpec
       html should include element withName("input").withAttrValue("name", "filter")
       html should include element withName("label").withAttrValue("for", "postcode").withValue("UK postcode")
       html should include element withName("input").withAttrValue("name", "postcode")
-      html should include element withName("button").withAttrValue("type", "submit").withValue("Find address")
+      html should include element withName("button").withAttrValue("type", "submit").withValue("Search for the address")
+      html should include element withAttrValue("id", "manualAddress").withValue("The address does not have a UK Postcode")
+      html.getElementById("postcode").`val` mustBe "ZZ1 1ZZ"
+      html.getElementById("filter").`val` mustBe "The House"
+    }
+
+    "return a form which permits input of building name/number and postcode when set to UK mode and should not pre pop" in new Scenario(
+          journeyData = Map("foo" -> basicJourney(ukModeBool=Some(true)))
+        ) {
+          val res = call(controller.lookup("foo"), req)
+          val html = contentAsString(res).asBodyFragment
+          html should include element withName("title").withValue("Find the address")
+          html should include element withName("h1").withValue("Find the address")
+          html should include element withName("form").withAttrValue("action", routes.AddressLookupController.select("foo").url)
+          html should include element withName("label").withAttrValue("for", "filter").withValue("Property name or number")
+          html should include element withName("input").withAttrValue("name", "filter")
+          html should include element withName("label").withAttrValue("for", "postcode").withValue("UK postcode")
+          html should include element withName("input").withAttrValue("name", "postcode")
+          html should include element withName("button").withAttrValue("type", "submit").withValue("Search for the address")
+          html should include element withAttrValue("id", "manualAddress").withValue("The address does not have a UK Postcode")
+          html.getElementById("postcode").`val` mustBe ""
+          html.getElementById("filter").`val` mustBe ""
+        }
+    "return a form that pre pops just post code" in new Scenario(
+      journeyData = Map("foo" -> basicJourney())
+    ) {
+      val res = call(controller.lookup("foo",postcode = Some("AB11 1AB")), req)
+      val html = contentAsString(res).asBodyFragment
+      html.getElementById("postcode").`val` mustBe "AB11 1AB"
+      html.getElementById("filter").`val` mustBe ""
     }
 
     "allow page title to be configured" in new Scenario(
@@ -324,6 +353,73 @@ class AddressLookupControllerSpec
       val tstEdit = Edit("", None, None, "", "postCode", Some("GB"))
       controller.addressOrDefault(Some(tstAddress)) must be (tstEdit)
     }
+
+    "return an address when called with a defined option - and long postcode" in new Scenario(
+      journeyData = Map("foo" -> basicJourney().copy(proposals = Some(Seq(ProposedAddress("GB1234567890", "AA11 BB2")))))
+    ) {
+      val tstAddress = ConfirmableAddress("auditRef", Some("id"), ConfirmableAddressDetails(postcode = Some("postCode")))
+      val tstEdit = Edit("", None, None, "", "postCode", Some("GB"))
+      controller.addressOrDefault(Some(tstAddress)) must be (tstEdit)
+    }
+
+    "return an address with a normalised postcode when called with no option and a long lookup postcode " in new Scenario(
+          journeyData = Map("foo" -> basicJourney().copy(proposals = Some(Seq(ProposedAddress("GB1234567890", "AA11 BB2")))))
+        ) {
+      val spacesInPostcode = Some("AA11     2BB")
+      val tstAddress = ConfirmableAddress("auditRef", Some("id"), ConfirmableAddressDetails())
+
+          val tstEdit = Edit("", None, None, "", "AA11 2BB", Some("GB"))
+          controller.addressOrDefault(None,spacesInPostcode) must be (tstEdit)
+        }
+
+    "return an address with a normalised postcode when called with no option and no spaces in lookup postcode " in new Scenario(
+      journeyData = Map("foo" -> basicJourney().copy(proposals = Some(Seq(ProposedAddress("GB1234567890", "AA11 BB2")))))
+    ) {
+      val lookUpPostcode = Some("AA112BB")
+      val tstAddress = ConfirmableAddress("auditRef", Some("id"), ConfirmableAddressDetails())
+
+      val tstEdit = Edit("", None, None, "", "AA11 2BB", Some("GB"))
+      controller.addressOrDefault(None,lookUpPostcode) must be (tstEdit)
+    }
+
+    "return an address with a blank postcode when called with no option and a lookup postcode with incorrect format" in new Scenario(
+      journeyData = Map("foo" -> basicJourney().copy(proposals = Some(Seq(ProposedAddress("GB1234567890", "AA11 BB2")))))
+    ) {
+      val lookUpPostcode = Some("AA11     BB2")
+      val tstAddress = ConfirmableAddress("auditRef", Some("id"), ConfirmableAddressDetails())
+
+      val tstEdit = Edit("", None, None, "", "", Some("GB"))
+      controller.addressOrDefault(None,lookUpPostcode) must be (tstEdit)
+    }
+
+    "return an address with a blank postcode when called with no option and a lookup postcode with invalid characters" in new Scenario(
+      journeyData = Map("foo" -> basicJourney().copy(proposals = Some(Seq(ProposedAddress("GB1234567890", "AA11 BB2")))))
+    ) {
+      val lookUpPostcode = Some("TF(3@r")
+      val tstAddress = ConfirmableAddress("auditRef", Some("id"), ConfirmableAddressDetails())
+
+      val tstEdit = Edit("", None, None, "", "", Some("GB"))
+      controller.addressOrDefault(None,lookUpPostcode) must be (tstEdit)
+    }
+
+    "return an address with a blank postcode when called with no option and a no lookup postcode" in new Scenario(
+      journeyData = Map("foo" -> basicJourney().copy(proposals = Some(Seq(ProposedAddress("GB1234567890", "AA11 BB2")))))
+    ) {
+
+      val tstAddress = ConfirmableAddress("auditRef", Some("id"), ConfirmableAddressDetails())
+
+      val tstEdit = Edit("", None, None, "", "", Some("GB"))
+      controller.addressOrDefault(None,None) must be (tstEdit)
+    }
+
+    "return an address when called with a defined option - postcode with no space" in new Scenario(
+      journeyData = Map("foo" -> basicJourney().copy(proposals = Some(Seq(ProposedAddress("GB1234567890", "AA11BB2")))))
+    ) {
+      val tstAddress = ConfirmableAddress("auditRef", Some("id"), ConfirmableAddressDetails(postcode = Some("postCode")))
+      val tstEdit = Edit("", None, None, "", "postCode", Some("GB"))
+      controller.addressOrDefault(Some(tstAddress)) must be (tstEdit)
+    }
+
     "return an address when called with an empty option" in new Scenario(
       journeyData = Map("foo" -> basicJourney().copy(proposals = Some(Seq(ProposedAddress("GB1234567890", "AA1 BB2")))))
     ) {
@@ -337,7 +433,7 @@ class AddressLookupControllerSpec
     "show all countries if no allowedCountryCodes configured whereby isukMode == false" in new Scenario(
       journeyData = Map("foo" -> basicJourney().copy(config = basicJourney().config.copy(allowedCountryCodes = None)))
     ) {
-      val res = controller.edit("foo").apply(req)
+      val res = controller.edit("foo",Some("ZZ1 1ZZ")).apply(req)
       val html = contentAsString(res).asBodyFragment
       html should include element withName("option").withAttrValue("value", "GB")
       html should include element withName("option").withAttrValue("value", "DE")
@@ -348,7 +444,7 @@ class AddressLookupControllerSpec
     "show dropdown of countries given by allowedCountryCodes if allowedCountryCodes is configured with several codes" in new Scenario(
       journeyData = Map("foo" -> basicJourney().copy(config = basicJourney().config.copy(allowedCountryCodes = Some(Set("GB", "FR")))))
     ) {
-      val res = controller.edit("foo").apply(req)
+      val res = controller.edit("foo",Some("ZZ1 1ZZ")).apply(req)
       val html = contentAsString(res).asBodyFragment
 
       html should not include element(withName("option").withAttrValue("value", "DE"))
@@ -359,7 +455,7 @@ class AddressLookupControllerSpec
     "show single country without dropdown if allowedCountryCodes is configured with a single country code" in new Scenario(
       journeyData = Map("foo" -> basicJourney().copy(config = basicJourney().config.copy(allowedCountryCodes = Some(Set("GB")))))
     ) {
-      val res = controller.edit("foo").apply(req)
+      val res = controller.edit("foo",Some("ZZ1 1ZZ")).apply(req)
       val html = contentAsString(res).asBodyFragment
 
       html should not include element(withName("option").withAttrValue("value", "GB"))
@@ -382,7 +478,7 @@ class AddressLookupControllerSpec
           config = basicJourney().config.copy(allowedCountryCodes = Some(Set("DE", "GB"))))
         )
       ) {
-        val res = controller.edit("foo").apply(req)
+        val res = controller.edit("foo",Some("ZZ1 1ZZ")).apply(req)
         val html = contentAsString(res).asBodyFragment
 
         html should not include element(withName("option").withAttrValue("value", "FR"))
@@ -395,7 +491,7 @@ class AddressLookupControllerSpec
           config = basicJourney().config.copy(allowedCountryCodes = Some(Set("DE"))))
         )
       ) {
-        val res = controller.edit("foo").apply(req)
+        val res = controller.edit("foo",Some("ZZ1 1ZZ")).apply(req)
         val html = contentAsString(res).asBodyFragment
 
         html should include element withName("input")
@@ -415,7 +511,7 @@ class AddressLookupControllerSpec
     "editing an address whereby isukMode == true returns ukEditMode page" in new Scenario(
       journeyData = Map("foo" -> basicJourney(Some(true)))
     ){
-      val res = controller.edit("foo").apply(req)
+      val res = controller.edit("foo",Some("ZZ1 1ZZ")).apply(req)
       status(res) must be(200)
       val html = contentAsString(res).asBodyFragment
       html should not include element(withName("input").withAttrValue("name","postcode"))

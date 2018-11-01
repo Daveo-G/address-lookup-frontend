@@ -42,7 +42,7 @@ object JourneyConfigDefaults {
   val CONFIRM_PAGE_INFO_SUBHEADING = "Your selected address"
   val CONFIRM_PAGE_INFO_MESSAGE_HTML = "This is how your address will look. Please double-check it and, if accurate, click on the <kbd>Confirm</kbd> button."
   val CONFIRM_PAGE_SUBMIT_LABEL = "Confirm and continue"
-  val CONFIRM_PAGE_EDIT_LINK_TEXT = "Edit address"
+  val CONFIRM_PAGE_EDIT_LINK_TEXT = "Edit this address"
 
   val EDIT_PAGE_TITLE = "Enter the address"
   val EDIT_PAGE_HEADING = "Enter the address"
@@ -58,17 +58,16 @@ object JourneyConfigDefaults {
   val LOOKUP_PAGE_HEADING = "Find the address"
   val LOOKUP_PAGE_FILTER_LABEL = "Property name or number"
   val LOOKUP_PAGE_POSTCODE_LABEL = "UK postcode"
-  val LOOKUP_PAGE_SUBMIT_LABEL = "Find address"
-  val LOOKUP_PAGE_MANUAL_ADDRESS_LINK_TEXT = "The address doesn't have a UK postcode"
-  // Uk Only Mode
-  val UK_LOOKUP_PAGE_MANUAL_ADDRESS_LINK_TEXT = "The address doesn't have a postcode"
+  val LOOKUP_PAGE_SUBMIT_LABEL = "Search for the address"
+  val LOOKUP_PAGE_MANUAL_ADDRESS_LINK_TEXT = "The address does not have a UK postcode"
 
   val SELECT_PAGE_TITLE = "Choose the address"
   val SELECT_PAGE_HEADING = "Choose the address"
+  val SELECT_PAGE_HEADING_WITH_POSTCODE = "Showing all results for "
   val SELECT_PAGE_PROPOSAL_LIST_LABEL = "Please select one of the following addresses"
   val SELECT_PAGE_SUBMIT_LABEL = "Continue"
 
-  val EDIT_LINK_TEXT = "Enter address manually"
+  val EDIT_LINK_TEXT = "Enter the address manually"
   val SEARCH_AGAIN_LINK_TEXT = "Search again"
 
   val CONFIRM_CHANGE_TEXT = "By confirming this change, you agree that the information you have given is complete and correct."
@@ -138,7 +137,7 @@ case class ResolvedLookupPage(p: LookupPage, isukMode: Boolean) {
   // TODO
   val resultLimitExceededMessage: Option[String] = None
   val noResultsFoundMessage: Option[String] = None
-  val manualAddressLinkText: String = if (isukMode) UK_LOOKUP_PAGE_MANUAL_ADDRESS_LINK_TEXT else p.manualAddressLinkText.getOrElse(LOOKUP_PAGE_MANUAL_ADDRESS_LINK_TEXT)
+  val manualAddressLinkText: String = p.manualAddressLinkText.getOrElse(LOOKUP_PAGE_MANUAL_ADDRESS_LINK_TEXT)
 }
 
 case class LookupPage(title: Option[String] = None,
@@ -153,6 +152,7 @@ case class LookupPage(title: Option[String] = None,
 case class ResolvedSelectPage(p: SelectPage) {
   val title: String = p.title.getOrElse(SELECT_PAGE_TITLE)
   val heading: String = p.heading.getOrElse(SELECT_PAGE_HEADING)
+  val headingWithPostcode: String = p.headingWithPostcode.getOrElse(SELECT_PAGE_HEADING_WITH_POSTCODE)
   val proposalListLabel: String = p.proposalListLabel.getOrElse(SELECT_PAGE_PROPOSAL_LIST_LABEL)
   val submitLabel: String = p.submitLabel.getOrElse(SELECT_PAGE_SUBMIT_LABEL)
   val showSearchAgainLink: Boolean = p.showSearchAgainLink.getOrElse(false)
@@ -162,6 +162,7 @@ case class ResolvedSelectPage(p: SelectPage) {
 
 case class SelectPage(title: Option[String] = None,
                       heading: Option[String] = None,
+                      headingWithPostcode: Option[String] = None,
                       proposalListLabel: Option[String] = None,
                       submitLabel: Option[String] = None,
                       proposalListLimit: Option[Int] = None,
@@ -260,8 +261,7 @@ case class ProposedAddress(addressId: String,
     lines.take(3).mkString(", ") + ", " +
       town.map(_ + ", ").getOrElse("") +
       county.map(_ + ", ").getOrElse("") +
-      postcode + ", " +
-      country.name
+      postcode
   }
 
 }

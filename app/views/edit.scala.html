@@ -9,13 +9,15 @@
 
   @if(journeyData.config.showBackButtons.getOrElse(true)) {
     <div>
-      <a class="back-link" href="javascript:history.back()">Back</a>
+      <a id="nonUkModeBack" class="back-link" href="javascript:history.back()">Back</a>
     </div>
   }
 
   @alfErrorSummary(
     "This page has errors", editForm
   )
+
+
 
 
   <h1 class="form-title heading-xlarge" id="pageHeading">@{journeyData.resolvedConfig.editPage.heading}</h1>

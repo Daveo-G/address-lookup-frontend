@@ -1,12 +1,11 @@
 package model
 
-import com.fasterxml.jackson.core.JsonParseException
 import fixtures.ALFEFixtures
+import model.JourneyConfigDefaults.LOOKUP_PAGE_MANUAL_ADDRESS_LINK_TEXT
 import model.JourneyData._
 import org.scalatest.{MustMatchers, WordSpec}
-import play.api.libs.json.{JsPath, JsResultException, Json}
+import play.api.libs.json.{JsResultException, Json}
 import services.ForeignOfficeCountryService
-import JourneyConfigDefaults.{UK_LOOKUP_PAGE_MANUAL_ADDRESS_LINK_TEXT, LOOKUP_PAGE_MANUAL_ADDRESS_LINK_TEXT}
 
 class ALFESpec extends WordSpec with MustMatchers with ALFEFixtures {
 
@@ -149,7 +148,7 @@ class ALFESpec extends WordSpec with MustMatchers with ALFEFixtures {
     "be able to describe itself" in {
       val prop = ProposedAddress("GB1234567890", "postcode", List("line1", "line2", "line3"), Some("town"), Some("county"), ForeignOfficeCountryService.find("GB").get)
       val desc = prop.toDescription
-      desc must be ("line1, line2, line3, town, county, postcode, United Kingdom")
+      desc must be ("line1, line2, line3, town, county, postcode")
     }
 
   }
@@ -269,7 +268,7 @@ class ALFESpec extends WordSpec with MustMatchers with ALFEFixtures {
     "default text when ukMode == true for ResolvedLookupPage.manualAddressLinkText" in {
       val res = ResolvedJourneyConfig(basicJourney(Some(true)).config)
       println(res)
-      res.lookupPage.manualAddressLinkText mustBe(UK_LOOKUP_PAGE_MANUAL_ADDRESS_LINK_TEXT)
+      res.lookupPage.manualAddressLinkText mustBe(LOOKUP_PAGE_MANUAL_ADDRESS_LINK_TEXT)
     }
     "default text when ukMode == false for ResolvedLookupPage.manualAddressLinkText" in {
       val res = ResolvedJourneyConfig(basicJourney().config)

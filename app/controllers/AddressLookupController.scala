@@ -75,11 +75,13 @@ class AddressLookupController @Inject()(journeyRepository: JourneyRepository, ad
   // GET  /:id/lookup
   // show the lookup form
   // we could potentially make a debatable minor "improvement" here by pre-populating with previously entered values stored in journeyData
-  def lookup(id: String) = Action.async { implicit req =>
+  def lookup(id: String, postcode: Option[String] = None, filter: Option[String] = None) = Action.async { implicit req =>
     withJourney(id) { journeyData =>
-      (None, Ok(views.html.lookup(id, journeyData, lookupForm)))
+      val formPrePopped = lookupForm.fill(Lookup(filter,postcode.fold("")(pc => Postcode.cleanupPostcode(pc).fold("")(_.toString))))
+      (None, Ok(views.html.lookup(id, journeyData, formPrePopped)))
     }
   }
+
 
   sealed trait ResultsCount
   case class OneResult(res: ProposedAddress) extends ResultsCount
@@ -150,10 +152,10 @@ class AddressLookupController @Inject()(journeyRepository: JourneyRepository, ad
   }
 
   // GET  /:id/edit
-  def edit(id: String) = Action.async { implicit req =>
+  def edit(id: String, lookUpPostCode: Option[String]) = Action.async { implicit req =>
     withJourney(id) { journeyData =>
-      val formFilled = editForm(journeyData.config.isukMode).fill(addressOrDefault(journeyData.selectedAddress))
-      if (journeyData.config.isukMode) {
+      val formFilled = editForm(journeyData.config.isukMode).fill(addressOrDefault(journeyData.selectedAddress,lookUpPostCode))
+      if (journeyData.config.isukMode || journeyData.selectedAddress.fold(false)(a => a.address.country.exists(c => c.code == "GB"))) {
         (None, Ok(views.html.ukModeEdit(id, journeyData, formFilled, allowedCountries(Seq.empty, journeyData.config.allowedCountryCodes))))
       } else {
         (None, Ok(views.html.edit(id, journeyData, formFilled, allowedCountries(countries, journeyData.config.allowedCountryCodes))))
@@ -161,8 +163,9 @@ class AddressLookupController @Inject()(journeyRepository: JourneyRepository, ad
     }
   }
 
-  private[controllers] def addressOrDefault(oAddr: Option[ConfirmableAddress]): Edit = {
-    oAddr map (_.toEdit) getOrElse Edit("", None, None, "", "", Some("GB"))
+  private[controllers] def addressOrDefault(oAddr: Option[ConfirmableAddress],lookUpPostCode: Option[String] = None): Edit = {
+    val displayPostcode = lookUpPostCode.fold("")(pc => Postcode.cleanupPostcode(pc).fold("")(_.toString))
+    oAddr map (_.toEdit) getOrElse Edit("", None, None, "", displayPostcode , Some("GB"))
   }
 
   // POST /:id/edit
