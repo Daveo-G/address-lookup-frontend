@@ -1,3 +1,34 @@
 # UK only mode
-ukmode.uk.label = United Kingdom
-ukmode.help.text = To use the service, this address must be in the UK.
+ukmode.uk.label             = United Kingdom
+ukmode.help.text            = To use the service, this address must be in the UK.
+
+# Common
+common.error.text           = This page has errors
+common.try.again.text       = Try again
+common.property.name.text   = Property name or number
+common.postcode.text        = Postcode
+
+# Confirm
+confirm.select.address.1    = You have not selected any address. Please
+confirm.select.address.2    = search for and select your address
+
+# No Results
+result.title.text           = Can''t find any addresses
+results.manual.entry.text   = Enter address manually
+results.heading.text        = We can''t find any addresses for
+
+# Select
+select.closest.results      = We can''t find an exact match for that search. Here are the closest results.
+select.no.results           = We couldn''t find any results for
+select.all.results          = Here are all the results for
+
+# Too many results
+too.many.results.title.text = No results found
+too.many.results.text       = Your search has too many results
+too.many.cannot.find.text   = We couldn't find any results for that property name or number
+too.many.searched.for.text  = You searched for:
+
+# No Journey
+no.journey.title.text       = No Journey
+no.journey.heading.text     = No Journey
+

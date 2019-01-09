@@ -15,19 +15,19 @@
   }
 
   @alfErrorSummary(
-    "This page has errors", selectForm
+    messages("common.error.text"), selectForm
   )
 
   <h1 class="form-title heading-xlarge" id="pageHeading">@{journeyData.resolvedConfig.selectPage.heading}</h1>
   @if(lookup.getOrElse(Lookup(None, "")).filter.isDefined) {
     @if(firstSearch) {
       <div>
-        <p>We can’t find an exact match for that search. Here are the closest results.</p>
+        <p>@messages("select.closest.results")</p>
       </div>
     } else {
       <div>
-        <p>We couldn't find any results for "@{lookup.get.filter.get}"</p>
-        <p>Here are all the results for @{lookup.get.postcode}</p>
+        <p>@messages("select.no.results") "@{lookup.get.filter.get}"</p>
+        <p>@messages("select.all.results") @(lookup.get.postcode)</p>
       </div>
     }
   }

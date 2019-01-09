@@ -5,7 +5,7 @@
 
 @(id: String, journeyData: JourneyData, postcode: String)(implicit request: Request[_], messages: Messages)
 
-@main_template(title = "Can’t find any addresses", journeyData = Some(journeyData)) {
+@main_template(title = messages("result.title.text"), journeyData = Some(journeyData)) {
 
     @if(journeyData.resolvedConfig.showBackButtons) {
         <div>
@@ -13,13 +13,13 @@
         </div>
     }
 
-    <h1 class="form-title heading-xlarge" id="pageHeading">We can't find any addresses for @{postcode}</h1>
+    <h1 class="form-title heading-xlarge" id="pageHeading">@messages("results.heading.text") @(postcode)</h1>
 
     @helpers.form(controllers.routes.AddressLookupController.lookup(id)) {
         <div class="form-group">
-            <button class="button" type="submit" id="continue">Try again</button>
+            <button class="button" type="submit" id="continue">@messages("common.try.again.text")</button>
         </div>
     }
 
-    <a href="@{routes.AddressLookupController.edit(id)}" id="enterManual">Enter address manually</a>
+    <a href="@{routes.AddressLookupController.edit(id)}" id="enterManual">@messages("results.manual.entry.text")</a>
 }

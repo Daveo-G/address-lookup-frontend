@@ -43,6 +43,6 @@
       </fieldset>
     }
   } else {
-    <p>You have not selected any address. Please <a href="@{routes.AddressLookupController.lookup(id)}" id="lookupLink">search for and select your address</a>.</p>
+    <p>@messages("confirm.select.address.1") <a href="@{routes.AddressLookupController.lookup(id)}" id="lookupLink">@messages("confirm.select.address.2")</a>.</p>
   }
 }

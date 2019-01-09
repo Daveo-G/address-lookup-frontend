@@ -5,7 +5,7 @@
 
 @(id: String, journeyData: JourneyData, lookup: Lookup, firstLookup: Boolean)(implicit request: Request[_], messages: Messages)
 
-@main_template(title = "No results found", journeyData = Some(journeyData)) {
+@main_template(title = messages("no.results.title.text"), journeyData = Some(journeyData)) {
 
     @if(journeyData.resolvedConfig.showBackButtons) {
         <div>
@@ -15,21 +15,21 @@
 
     <h1 class="form-title heading-xlarge" id="pageHeading">
         @if(firstLookup) {
-            Your search has too many results
+            messages("too.many.results.text")
         } else {
-            We couldn't find any results for that property name or number
+            messages("too.many.cannot.find.text")
         }
     </h1>
 
     <table>
-        <caption class="text--left">You searched for:</caption>
+        <caption class="text--left">@messages("too.many.searched.for.text")</caption>
         <tbody>
         <tr>
-            <td>Property name or number</td>
+            <td>@messages("common.property.name.text")</td>
             <td>@{lookup.filter.getOrElse("")}</td>
         </tr>
         <tr>
-            <td>Postcode</td>
+            <td>@messages("common.postcode.text")</td>
             <td>@{lookup.postcode}</td>
         </tr>
         </tbody>
@@ -37,9 +37,9 @@
 
     @helpers.form(controllers.routes.AddressLookupController.lookup(id)) {
         <div class="form-group">
-            <button class="button" type="submit" id="continue">Try again</button>
+            <button class="button" type="submit" id="continue">@messages("common.try.again.text")</button>
         </div>
     }
 
-    <a href="@{routes.AddressLookupController.edit(id)}" id="enterManual">Enter address manually</a>
+    <a href="@{routes.AddressLookupController.edit(id)}" id="enterManual">@messages("results.manual.entry.text")</a>
 }
