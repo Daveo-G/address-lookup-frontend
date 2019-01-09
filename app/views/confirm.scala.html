@@ -1,6 +1,5 @@
 
 @import model._
-@import utils.IsCountryUK
 @import templates.address_confirmation_display
 @import uk.gov.hmrc.play.views.html.helpers
 
@@ -12,7 +11,7 @@
       <a class="back-link" href="javascript:history.back()">Back</a>
     </div>
   }
-  <h1 class="form-title heading-large" id="pageHeading">@{journeyData.resolvedConfig.confirmPage.heading}</h1>
+  <h1 class="form-title heading-xlarge" id="pageHeading">@{journeyData.resolvedConfig.confirmPage.heading}</h1>
   @if(selectedAddress.isDefined) {
     @helpers.form(controllers.routes.AddressLookupController.handleConfirm(id)) {
       <fieldset class="form-field-group">
@@ -30,7 +29,7 @@
         }
         @if(journeyData.resolvedConfig.confirmPage.showChangeLink) {
         <div class="form-field">
-          <p><a href="@{routes.AddressLookupController.edit(id,None,Some(IsCountryUK.countryCheck(selectedAddress)))}" id="changeLink">@{journeyData.resolvedConfig.confirmPage.changeLinkText}</a></p>
+          <p><a href="@{routes.AddressLookupController.edit(id)}" id="changeLink">@{journeyData.resolvedConfig.confirmPage.changeLinkText}</a></p>
         </div>
         }
         @if(journeyData.resolvedConfig.confirmPage.showConfirmChangeText){
@@ -44,6 +43,6 @@
       </fieldset>
     }
   } else {
-    <p>You have not selected any address. Please <a href="@{routes.AddressLookupController.lookup(id)}" id="lookupLink">search for and select your address</a>.</p>
+    <p>@messages("confirm.select.address.1") <a href="@{routes.AddressLookupController.lookup(id)}" id="lookupLink">@messages("confirm.select.address.2")</a>.</p>
   }
 }

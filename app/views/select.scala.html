@@ -15,28 +15,19 @@
   }
 
   @alfErrorSummary(
-    "This page has errors", selectForm
+    messages("common.error.text"), selectForm
   )
 
-@if(lookup.getOrElse(Lookup(None, "")).filter.isDefined) {
-@if(!firstSearch){
-  <h1 class="form-title heading-large" id="pageHeading">@{journeyData.resolvedConfig.selectPage.headingWithPostcode} @{lookup.get.postcode}</h1>
-} else {
-
-  <h1 class="form-title heading-large" id="pageHeading">@{journeyData.resolvedConfig.selectPage.heading}</h1>
-}
-
-} else {
-  <h1 class="form-title heading-large" id="pageHeading">@{journeyData.resolvedConfig.selectPage.heading}</h1>
-}
-
+  <h1 class="form-title heading-xlarge" id="pageHeading">@{journeyData.resolvedConfig.selectPage.heading}</h1>
   @if(lookup.getOrElse(Lookup(None, "")).filter.isDefined) {
-    @if(!firstSearch) {
-      <div class="form-field">
-        <p>We could not find a match with '@{lookup.get.filter.get}'.</p>
-      </div>
+    @if(firstSearch) {
       <div>
-        <p><a href="@{routes.AddressLookupController.lookup(id,Some(lookup.get.postcode),Some(lookup.get.filter.get))}" id="differentAddress">Try a different name or number</a></p>
+        <p>@messages("select.closest.results")</p>
+      </div>
+    } else {
+      <div>
+        <p>@messages("select.no.results") "@{lookup.get.filter.get}"</p>
+        <p>@messages("select.all.results") @(lookup.get.postcode)</p>
       </div>
     }
   }
@@ -44,17 +35,20 @@
   </br>
 
   @helpers.form(controllers.routes.AddressLookupController.handleSelect(id)) {
-
     <fieldset>
-
       <div class="form-group">
         @alfInputRadioGroup(selectForm("addressId"), proposals.toHtmlOptions, '_label -> journeyData.resolvedConfig.selectPage.proposalListLabel, '_labelClass -> "block-label")
       </div>
+      @if(journeyData.resolvedConfig.selectPage.showSearchAgainLink) {
+        <div class="form-field">
+          <p><a href="@{routes.AddressLookupController.lookup(id)}" id="searchAgain">@{journeyData.resolvedConfig.selectPage.searchAgainLinkText}</a></p>
+        </div>
+      }
       <div class="form-group">
         <button class="button" type="submit" id="continue">@{journeyData.resolvedConfig.selectPage.submitLabel}</button>
       </div>
       <div class="form-field">
-        <p><a href="@{routes.AddressLookupController.edit(id,Some(lookup.get.postcode),Some(true))}" id="editAddress">@{journeyData.resolvedConfig.selectPage.editAddressLinkText}</a></p>
+        <p><a href="@{routes.AddressLookupController.edit(id)}" id="editAddress">@{journeyData.resolvedConfig.selectPage.editAddressLinkText}</a></p>
       </div>
     </fieldset>
   }
