@@ -29,6 +29,10 @@ trait PageContentHelper { unitSpec: UnitSpec =>
 
   def testElementExists(response: Future[WSResponse], elementId: String): Unit = {
     val doc = getDocFromResponse(response)
-    doc.getElementById(elementId)
+    doc.getElementById(elementId) should not be null
+  }
+  def testElementDoesntExist(response: Future[WSResponse], elementId: String): Unit = {
+    val doc = getDocFromResponse(response)
+      doc.getElementById(elementId) shouldBe null
   }
 }
